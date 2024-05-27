@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import SignIn from "./Components/googleSignIn/signIn"; // Replace with your actual login component path
-import { CircularProgress } from "@mui/material";
-import "./App.css"; // Import your CSS styles (optional)
+import SignIn from "./Components/googleSignIn/signIn";
+import "./App.css";
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,7 +11,7 @@ import Home from "../src/view/partials/Home";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "./view/partials/Header";
-import { auth, provider } from "./Components/firebase/firebase"; // Assuming config file with Firebase settings
+import { auth, provider } from "./Components/firebase/firebase";
 import Update from "./view/account/Update";
 import Admin from "../src/view/admin/Admin";
 import Manager from "../src/view/manager/Manager";
@@ -26,9 +25,9 @@ import ForgotPassword from "./Components/googleSignIn/ForgotPassword";
 
 function MainContent() {
   const location = useLocation();
-  const [currentPath, setCurrentPath] = useState(location.pathname);
+  const [currentPath, setCurrentPath] = useState("");
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -39,36 +38,43 @@ function MainContent() {
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
-      }, 1000);
+      }, 1500); 
     };
 
     handleLoading();
 
     return () => {
-      unsubscribe(); 
-      clearTimeout(handleLoading); 
+      unsubscribe();
+      clearTimeout(handleLoading);
     };
   }, [location.pathname]);
 
   return (
     <div className="App">
-      <Header user={user} currentPath={currentPath} />
-      {loading ? (
-        <CircularProgress className="loading-spinner" />
-      ) : (
-        <Routes>
-          <Route path="/signIn" element={<SignIn />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/account" element={<Update user={user} />} />
-          <Route path="/admin/*" element={<Admin />} />
-          <Route path="/manager" element={<Manager />} />
-          <Route path="/pet" element={<Pet />} />
-          <Route path="/pet/add" element={<AddPet />} />
-          <Route path="/book" element={<Book />} />
-          <Route path="/qr" element={<QrCodePage />} />
-          <Route path="/transaction-history" element={<Transaction />} />
-          <Route path="/reset" element={<ForgotPassword />} />
-        </Routes>
+      {loading && (
+        <div className="loading-dots">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      )}
+      {!loading && (
+        <>
+          <Header user={user} currentPath={currentPath} setUser={setUser} />
+          <Routes>
+            <Route path="/signIn" element={<SignIn />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/account" element={<Update user={user} />} />
+            <Route path="/admin/*" element={<Admin />} />
+            <Route path="/manager" element={<Manager />} />
+            <Route path="/pet" element={<Pet />} />
+            <Route path="/pet/add" element={<AddPet />} />
+            <Route path="/book" element={<Book />} />
+            <Route path="/qr" element={<QrCodePage />} />
+            <Route path="/transaction-history" element={<Transaction />} />
+            <Route path="/reset" element={<ForgotPassword />} />
+          </Routes>
+        </>
       )}
     </div>
   );

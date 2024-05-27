@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { auth } from "../../Components/firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaw } from "@fortawesome/free-solid-svg-icons";
 import { updateProfile } from "firebase/auth";
 import { getDatabase, ref, onValue } from "firebase/database";
 
-function Header({ user, currentPath }) {
+function Header({ user, setUser }) { // Ensure setUser is passed as a prop
   const navigate = useNavigate();
+  const location = useLocation();
   const dropdownRef = useRef(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [username, setUsername] = useState("");
   const [fullname, setFullname] = useState("");
   const [isVerified, setIsVerified] = useState(false);
-  const [headerVisible, setHeaderVisible] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -23,6 +24,7 @@ function Header({ user, currentPath }) {
   const logout = () => {
     auth.signOut().then(() => {
       localStorage.clear();
+      setUser(null); // Update user state
       navigate("/");
       toggleDropdown();
     });
@@ -73,7 +75,6 @@ function Header({ user, currentPath }) {
 
       onValue(userRef, (snapshot) => {
         const data = snapshot.val();
-        console.log(data.bookings)
         if (data) {
           setUsername(data.username);
           setFullname(data.fullname);
@@ -125,12 +126,11 @@ function Header({ user, currentPath }) {
     navigate("/#contact");
   };
 
-  const shouldShowHeader = !currentPath.startsWith("/admin") && currentPath !== "/manager" && currentPath !== "/veterinary";
+  const shouldShowHeader = !location.pathname.startsWith("/admin") && location.pathname !== "/manager" && location.pathname !== "/veterinary";
 
   if (!shouldShowHeader) {
-    return null; // Don't render the header if it's a login or admin page
+    return null; // Don't render the header if it's an admin, manager, or veterinary page
   }
-
 
   return (
     <header className={`header ${headerVisible ? '' : 'hidden'}`}>
@@ -167,21 +167,19 @@ function Header({ user, currentPath }) {
         >
           Contact
         </a>
-        {shouldShowHeader && (
-          user && isVerified ? (
-            <div className="dropdown" ref={dropdownRef}>
-              <span onClick={toggleDropdown} className="username">
-                {user.displayName || username || fullname}
-              </span>
-              <div className={`dropdown-content ${dropdownOpen ? "show" : ""}`}>
-                <div onClick={updateAccount}>Account</div>
-                <div onClick={pet}>Pet</div>
-                <div onClick={logout}>Logout</div>
-              </div>
+        {user && isVerified ? (
+          <div className="dropdown" ref={dropdownRef}>
+            <span onClick={toggleDropdown} className="username">
+              {user.displayName || username || fullname}
+            </span>
+            <div className={`dropdown-content ${dropdownOpen ? "show" : ""}`}>
+              <div onClick={updateAccount}>Account</div>
+              <div onClick={pet}>Pet</div>
+              <div onClick={logout}>Logout</div>
             </div>
-          ) : (
-            <button onClick={login}>Login</button>
-          )
+          </div>
+        ) : (
+          <button onClick={login}>Login</button>
         )}
       </nav>
     </header>
