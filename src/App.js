@@ -22,12 +22,14 @@ import QrCodePage from "../src/view/qr/QrCodePage";
 import Transaction from "../src/Components/transaction/TransactionHistory";
 import { TransactionProvider } from "../src/Components/context/TransactionContext";
 import ForgotPassword from "./Components/googleSignIn/ForgotPassword";
+import BookingManagement from "./view/manager/BookingManagement";
 
 function MainContent() {
   const location = useLocation();
   const [currentPath, setCurrentPath] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const userRole = "manager";
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -60,13 +62,15 @@ function MainContent() {
       )}
       {!loading && (
         <>
-          <Header user={user} currentPath={currentPath} setUser={setUser} />
+          <Header user={user} setUser={setUser} role={userRole} />
+
           <Routes>
             <Route path="/signIn" element={<SignIn />} />
             <Route path="/" element={<Home />} />
             <Route path="/account" element={<Update user={user} />} />
             <Route path="/admin/*" element={<Admin />} />
-            <Route path="/manager" element={<Manager />} />
+            <Route path="/manager/*" element={<Manager />} />
+            <Route path="bookings" element={<BookingManagement />} />
             <Route path="/pet" element={<Pet />} />
             <Route path="/pet/add" element={<AddPet />} />
             <Route path="/book" element={<Book />} />

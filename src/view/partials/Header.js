@@ -6,7 +6,7 @@ import { faPaw } from "@fortawesome/free-solid-svg-icons";
 import { updateProfile } from "firebase/auth";
 import { getDatabase, ref, onValue } from "firebase/database";
 
-function Header({ user, setUser }) { // Ensure setUser is passed as a prop
+function Header({ user, setUser, role }) { // Ensure setUser is passed as a prop
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
@@ -126,7 +126,10 @@ function Header({ user, setUser }) { // Ensure setUser is passed as a prop
     navigate("/#contact");
   };
 
-  const shouldShowHeader = !location.pathname.startsWith("/admin") && location.pathname !== "/manager" && location.pathname !== "/veterinary";
+  const shouldShowHeader =
+    !location.pathname.startsWith("/admin") &&
+    location.pathname !== "/veterinary" &&
+    !(role === "manager" && location.pathname.startsWith("/manager"));
 
   if (!shouldShowHeader) {
     return null; // Don't render the header if it's an admin, manager, or veterinary page

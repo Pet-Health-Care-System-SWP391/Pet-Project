@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { updateProfile } from "firebase/auth"; 
 import { getDatabase, ref, onValue, update } from "firebase/database";
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Update() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ function Update() {
   const [userId, setUserId] = useState("");
   const [fullname, setFullname] = useState("");
   const [loading, setLoading] = useState(true);
-  const [userUpdated, setUserUpdated] = useState(false); // State để theo dõi cập nhật của người dùng
+  const [userUpdated, setUserUpdated] = useState(false); 
   const navigate = useNavigate();
   const user = auth.currentUser;
 
@@ -32,7 +33,7 @@ function Update() {
     if (userId) {
       const db = getDatabase();
       const userRef = ref(db, "users/" + userId);
-
+  
       onValue(userRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -41,6 +42,7 @@ function Update() {
           setPhone(data.phone);
           setAddress(data.address);
           setAccountBalance(data.accountBalance);
+          setFullname(data.fullname); // Cập nhật fullname từ dữ liệu Firebase
         }
         setLoading(false);
       });
@@ -85,11 +87,9 @@ function Update() {
           });
 
           await update(ref(getDatabase(), "users/" + userId), updates);
-          navigate("/account")
-          setUserUpdated(true); // Đánh dấu cập nhật của người dùng
-          toast.success("Cập nhật thành công !!!");
+          setUserUpdated(true); 
         } catch (error) {
-          toast.error("Lỗi");
+          toast.error("Cập nhật thất bại");
         }
       }
     } else {
@@ -101,94 +101,100 @@ function Update() {
   useEffect(() => {
     if (userUpdated) {
       setUserUpdated(false);
-      setEmail(localStorage.getItem('email') || '');
-      setUsername(localStorage.getItem('username') || '');
+      toast.success("Cập nhật thành công !!!");
+      navigate("/account")
     }
-  }, [userUpdated]);
+  }, [userUpdated, navigate]);
 
   return (
-    <div className="container container-update" id="container">
-      <div className="account">
-        <h3 className="account-title">Update Account</h3>
-        <form onSubmit={handleSubmit}>
-        <label>Email</label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="off"
-            value={email}
-            placeholder="Enter your email"
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-            className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
-            disabled
-          />
-          <label>Account Balance</label>
-          <input
-            id="accountBalance"
-            type="accountBalance"
-            autoComplete="off"
-            value={accountBalance}
-            onChange={(e) => {
-              setAccountBalance(e.target.value);
-            }}
-            className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
-            
-          />
-          <label>Full Name</label>
-          <input
-            id="fullname"
-            type="fullname"
-            autoComplete="off"
-            value={fullname}
-            placeholder="Enter your full name"
-            onChange={(e) => {
-              setFullname(e.target.value);
-            }}
-            className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
-          />
-          <label>Phone</label>
-          <input
-            id="phone"
-            type="phone"
-            autoComplete="off"
-            value={phone}
-            placeholder="Enter your phone"
-            onChange={(e) => {
-              setPhone(e.target.value);
-            }}
-            className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
-          />
-          <label>Address</label>
-          <input
-            id="address"
-            type="address"
-            autoComplete="off"
-            value={address}
-            placeholder="Enter your address"
-            onChange={(e) => {
-              setAddress(e.target.value);
-            }}
-            className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
-          />
-          <label>Username</label>
-          <input
-            id="username"
-            type="text"
-            autoComplete="off"
-            required
-            value={username}
-            placeholder="Enter your username"
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
-            disabled
-            className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
-          />
-          <button type="submit">Update</button>
-        </form>
-      </div>
+    <div>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="container container-update" id="container">
+          <div className="account">
+            <h3 className="account-title">Update Account</h3>
+            <form onSubmit={handleSubmit}>
+              <label>Email</label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="off"
+                value={email}
+                placeholder="Enter your email"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+                disabled
+              />
+              <label>Account Balance</label>
+              <input
+                id="accountBalance"
+                type="accountBalance"
+                autoComplete="off"
+                value={accountBalance}
+                onChange={(e) => {
+                  setAccountBalance(e.target.value);
+                }}
+                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+              />
+              <label>Full Name</label>
+              <input
+                id="fullname"
+                type="fullname"
+                autoComplete="off"
+                value={fullname}
+                placeholder="Enter your full name"
+                onChange={(e) => {
+                  setFullname(e.target.value);
+                }}
+                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+              />
+              <label>Phone</label>
+              <input
+                id="phone"
+                type="phone"
+                autoComplete="off"
+                value={phone}
+                placeholder="Enter your phone"
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                }}
+                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+              />
+              <label>Address</label>
+              <input
+                id="address"
+                type="address"
+                autoComplete="off"
+                value={address}
+                placeholder="Enter your address"
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                }}
+                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+              />
+              <label>Username</label>
+              <input
+                id="username"
+                type="text"
+                autoComplete="off"
+                required
+                value={username}
+                placeholder="Enter your username"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                disabled
+                className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:indigo-600 shadow-sm rounded-lg transition duration-300"
+              />
+              <button type="submit">Update</button>
+            </form>
+          </div>
+        </div>
+      )}
+      <ToastContainer />
     </div>
   );
 }

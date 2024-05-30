@@ -131,15 +131,15 @@ function SignIn() {
       toast.error("Password not match, please try again!");
       return; // Prevent form submission
     }
-
+  
     const username = email.split('@')[0];
-
+  
     const expression = /^[^@]+@\w+(\.\w+)+\w$/;
     if (!expression.test(email)) {
       toast.error("Email is invalid. Please enter a valid email address.");
       return; // Prevent form submission
     }
-
+  
     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
     if (signInMethods.length > 0) {
       setIsRegistering(false); // Allow user to edit registration info
@@ -148,7 +148,7 @@ function SignIn() {
       );
       return; // Prevent form submission
     }
-
+  
     if (!isRegistering) {
       setIsRegistering(true);
       try {
@@ -166,6 +166,10 @@ function SignIn() {
           accountBalance: 0
         }); 
         addDataBase(userId, email, username, "user", ); // Omit password from user data
+        
+        // Đăng xuất người dùng sau khi đăng ký thành công
+        await auth.signOut();
+  
         // window.location.reload();
         navigate("/"); // Redirect to home page
         toast.success("Registration successful. Please check your email for verification then login to our system again.");
@@ -177,6 +181,8 @@ function SignIn() {
       }
     }
   };
+  
+  
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -203,9 +209,7 @@ function SignIn() {
         auth.signOut();
         return;
       }
-      const userEmail = user.email;
-      setUserEmail(userEmail);
-      localStorage.setItem("email", userEmail); // Xem xét việc lưu trữ an toàn trong sản xuất
+  
       const userId = user.uid;
       const db = getDatabase();
       const userRef = ref(db, 'users/' + userId);
@@ -215,15 +219,14 @@ function SignIn() {
       const userDataSnapshot = await new Promise((resolve) => {
         onValue(userRef, (snapshot) => {
           resolve(snapshot);
-        }, { onlyOnce: true });
+        });
       });
   
       const userData = userDataSnapshot.val();
-      console.log('User Data from Firebase:', userData);
   
       if (!userData) {
         await set(userRef, {
-          email: userEmail,
+          email: user.email,
           username: user.displayName,
           role: userRole,
           isVerified: true,
@@ -234,7 +237,8 @@ function SignIn() {
         // Chỉ cập nhật accountBalance nếu nó chưa tồn tại
         if (userData.accountBalance === undefined) {
           await update(userRef, {
-            accountBalance: 0
+            accountBalance: 0,
+            userEmail: userEmail,
           });
         }
         // Cập nhật các trường khác mà không làm thay đổi accountBalance
@@ -274,9 +278,11 @@ function SignIn() {
       }
       toast.success("Login successfully. Wish you enjoy our best experience");
     } catch (error) {
+      // Xử lý các lỗi Firebase ở đây
       toast.error("Something went wrong. Please check your email or password and try again!");
     }
   };
+  
   
   
 
