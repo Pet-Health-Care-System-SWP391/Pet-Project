@@ -1387,13 +1387,3 @@ text-decoration: underline;
   .sidebar-menu ul li a .fa-icon {
     margin-right: 10px;
   }
-  
-  .manager-container {
-    display: flex;
-  }
-  
-  .content {
-    margin-left: 250px;
-    padding: 20px;
-    width: 100%;
-  }

@@ -23,6 +23,7 @@ import Transaction from "../src/Components/transaction/TransactionHistory";
 import { TransactionProvider } from "../src/Components/context/TransactionContext";
 import ForgotPassword from "./Components/googleSignIn/ForgotPassword";
 import BookingManagement from "./view/manager/BookingManagement";
+import CageManagement from "./view/manager/CageManagement";
 
 function MainContent() {
   const location = useLocation();
@@ -71,6 +72,7 @@ function MainContent() {
             <Route path="/admin/*" element={<Admin />} />
             <Route path="/manager/*" element={<Manager />} />
             <Route path="bookings" element={<BookingManagement />} />
+            <Route path="cages" element={<CageManagement />} />
             <Route path="/pet" element={<Pet />} />
             <Route path="/pet/add" element={<AddPet />} />
             <Route path="/book" element={<Book />} />

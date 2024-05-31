@@ -24,7 +24,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link to="kennels">
+            <Link to="cages">
               <FontAwesomeIcon icon={faPaw} className="fa-icon" /> Kennel Management
             </Link>
           </li>

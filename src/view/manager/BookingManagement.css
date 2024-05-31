@@ -1,0 +1,49 @@
+.booking-management {
+    padding: 20px;
+    background: #2c2c54;
+    color: #ffffff;
+  }
+  
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #3c3c70;
+  }
+  
+  .bookings-table th, .bookings-table td {
+    border: 1px solid #4a4a80;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .bookings-table th {
+    background: #4a4a80;
+    font-size: 16px;
+    color: #00d2d3;
+  }
+  
+  .bookings-table td {
+    font-size: 14px;
+  }
+  
+  .bookings-table tr:nth-child(even) {
+    background: #3b3b6d;
+  }
+  
+  .bookings-table tr:hover {
+    background: #565699;
+  }
+  
+  button {
+    background: #ff6b6b;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  button:hover {
+    background: #ff5252;
+  }
+  
