@@ -11,22 +11,30 @@ const BookingManagement = () => {
   useEffect(() => {
     const db = getDatabase();
     const bookingRef = ref(db, 'users');
-    const bookings = [];
 
-
-    onValue(bookingRef, (snapshot) => {
+    onValue(bookingRef, async (snapshot) => {
+      const bookingPromises = [];
+      
       snapshot.forEach((userSnapshot) => {
         const userId = userSnapshot.key;
         const userBookingsRef = ref(db, `users/${userId}/bookings`);
-        onValue(userBookingsRef, (bookingsSnapshot) => {
-          bookingsSnapshot.forEach((bookingSnapshot) => {
-            const bookingId = bookingSnapshot.key;
-            const bookingData = bookingSnapshot.val();
-            bookings.push({ id: bookingId, ...bookingData });
+        const bookingPromise = new Promise((resolve) => {
+          onValue(userBookingsRef, (bookingsSnapshot) => {
+            const userBookings = [];
+            bookingsSnapshot.forEach((bookingSnapshot) => {
+              const bookingId = bookingSnapshot.key;
+              const bookingData = bookingSnapshot.val();
+              userBookings.push({ id: bookingId, ...bookingData });
+            });
+            resolve(userBookings);
           });
         });
+        bookingPromises.push(bookingPromise);
       });
-      setBookings(bookings);
+
+      const allBookings = await Promise.all(bookingPromises);
+      setBookings(allBookings.flat());
+      setLoading(false);
     });
   }, []);
 
@@ -37,6 +45,7 @@ const BookingManagement = () => {
     try {
       await update(bookingRef, { status: 'cancelled', amountToPay: 0 });
       setBookings(bookings.map(booking => booking.id === id ? { ...booking, status: 'cancelled', amountToPay: 0 } : booking));
+      toast.success('Booking cancelled successfully');
     } catch (error) {
       console.error("Error cancelling booking:", error);
       toast.error(`Error cancelling booking: ${error.message}`);

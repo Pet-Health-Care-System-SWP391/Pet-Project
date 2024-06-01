@@ -5,10 +5,10 @@ import './CageManagement.css';
 const CageManagement = () => {
   const [cages, setCages] = useState([]);
   const [newCageName, setNewCageName] = useState('');
-  const [newCageStatus, setNewCageStatus] = useState('');
+  const [newCageStatus, setNewCageStatus] = useState('Available');
   const [editingCageId, setEditingCageId] = useState(null);
   const [editingCageName, setEditingCageName] = useState('');
-  const [editingCageStatus, setEditingCageStatus] = useState('');
+  const [editingCageStatus, setEditingCageStatus] = useState('Available');
 
   useEffect(() => {
     const db = getDatabase();
@@ -18,30 +18,36 @@ const CageManagement = () => {
     onValue(cagesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setCages(Object.values(data));
+        setCages(Object.entries(data).map(([id, cage]) => ({ id, ...cage })));
       } else {
         setCages([]);
       }
     });
   }, []);
 
-  const handleAddCage = () => {
+  const handleAddCage = (e) => {
+    e.preventDefault();
     const db = getDatabase();
     const newCageRef = push(ref(db, 'cages'));
     update(newCageRef, { name: newCageName, status: newCageStatus });
     setNewCageName('');
-    setNewCageStatus('');
+    setNewCageStatus('Available');
   };
 
-  const handleEditCage = (cageId) => {
-    setEditingCageId(cageId);
+  const handleEditCage = (cage) => {
+    setEditingCageId(cage.id);
+    setEditingCageName(cage.name);
+    setEditingCageStatus(cage.status);
   };
 
-  const handleUpdateCage = () => {
+  const handleUpdateCage = (e) => {
+    e.preventDefault();
     const db = getDatabase();
     const cageRef = ref(db, `cages/${editingCageId}`);
     update(cageRef, { name: editingCageName, status: editingCageStatus });
     setEditingCageId(null);
+    setEditingCageName('');
+    setEditingCageStatus('Available');
   };
 
   const handleDeleteCage = (cageId) => {
@@ -52,52 +58,56 @@ const CageManagement = () => {
 
   return (
     <div className="cage-management">
-      <h1>Quản lý chuồng</h1>
-      <div className="cage-list">
-        <h2>Danh sách chuồng</h2>
-        <ul>
-          {cages.map(cage => (
-            <li key={cage.cageId}>
-              <span>{cage.name}</span>
-              <span>{cage.status === 'empty' ? 'Trống' : 'Đã có thú cưng'}</span>
-              <button onClick={() => handleEditCage(cage.cageId)}>Sửa</button>
-              <button onClick={() => handleDeleteCage(cage.cageId)}>Xóa</button>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="add-cage">
-        <h2>Thêm chuồng mới</h2>
-        <form>
-          <label>Tên chuồng:</label>
-          <input type="text" value={newCageName} onChange={(e) => setNewCageName(e.target.value)} />
-          <br />
-          <label>Tình trạng:</label>
-          <select value={newCageStatus} onChange={(e) => setNewCageStatus(e.target.value)}>
-            <option value="empty">Trống</option>
-            <option value="occupied">Đã có thú cưng</option>
-          </select>
-          <br />
-          <button onClick={handleAddCage}>Thêm</button>
-        </form>
-      </div>
-      {editingCageId && (
-        <div className="edit-cage">
-          <h2>Sửa chuồng</h2>
-          <form>
-            <label>Tên chuồng:</label>
-            <input type="text" value={editingCageName} onChange={(e) => setEditingCageName(e.target.value)} />
-            <br />
-            <label>Tình trạng:</label>
-            <select value={editingCageStatus} onChange={(e) => setEditingCageStatus(e.target.value)}>
-              <option value="empty">Trống</option>
-              <option value="occupied">Đã có thú cưng</option>
-            </select>
-            <br />
-            <button onClick={handleUpdateCage}>Cập nhật</button>
-          </form>
+      <h1>Cage Management</h1>
+      <div className="content">
+        <div className="cage-list">
+          <h2>List of cages</h2>
+          <ul>
+            {cages.map(cage => (
+              <li key={cage.id}>
+                <span>{cage.name}</span>
+                <span>{cage.status === 'Available' ? 'Available' : 'Already have a pet'}</span>
+                <button onClick={() => handleEditCage(cage)}>Edit</button>
+                <button onClick={() => handleDeleteCage(cage.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
+        <div className="forms">
+          <div className="add-cage">
+            <h2>Thêm chuồng mới</h2>
+            <form onSubmit={handleAddCage}>
+              <label>Tên chuồng:</label>
+              <input type="text" value={newCageName} onChange={(e) => setNewCageName(e.target.value)} />
+              <br />
+              <label>Tình trạng:</label>
+              <select value={newCageStatus} onChange={(e) => setNewCageStatus(e.target.value)}>
+                <option value="Available">Trống</option>
+                <option value="Occupied">Đã có thú cưng</option>
+              </select>
+              <br />
+              <button type="submit">Thêm</button>
+            </form>
+          </div>
+          {editingCageId && (
+            <div className="edit-cage">
+              <h2>Sửa chuồng</h2>
+              <form onSubmit={handleUpdateCage}>
+                <label>Tên chuồng:</label>
+                <input type="text" value={editingCageName} onChange={(e) => setEditingCageName(e.target.value)} />
+                <br />
+                <label>Tình trạng:</label>
+                <select value={editingCageStatus} onChange={(e) => setEditingCageStatus(e.target.value)}>
+                  <option value="Available">Trống</option>
+                  <option value="Occupied">Đã có thú cưng</option>
+                </select>
+                <br />
+                <button type="submit">Cập nhật</button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
