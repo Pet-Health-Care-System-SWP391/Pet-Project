@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue, getDatabase, update, push, remove } from "firebase/database";
+import { ref, onValue, getDatabase, update, push, remove, set, get } from "firebase/database";
 import './CageManagement.css';
 
 const CageManagement = () => {
@@ -12,7 +12,6 @@ const CageManagement = () => {
 
   useEffect(() => {
     const db = getDatabase();
-
     const cagesRef = ref(db, 'cages');
 
     onValue(cagesRef, (snapshot) => {
@@ -25,11 +24,21 @@ const CageManagement = () => {
     });
   }, []);
 
-  const handleAddCage = (e) => {
+  const generateCageId = async () => {
+    const db = getDatabase();
+    const cagesRef = ref(db, 'cages');
+    const snapshot = await get(cagesRef);
+    const data = snapshot.val();
+    const numberOfCages = data ? Object.keys(data).length : 0;
+    return `cage${numberOfCages + 1}`;
+  };
+
+  const handleAddCage = async (e) => {
     e.preventDefault();
     const db = getDatabase();
-    const newCageRef = push(ref(db, 'cages'));
-    update(newCageRef, { name: newCageName, status: newCageStatus });
+    const newCageId = await generateCageId();
+    const newCageRef = ref(db, `cages/${newCageId}`);
+    set(newCageRef, { name: newCageName, status: newCageStatus, id: newCageId });
     setNewCageName('');
     setNewCageStatus('Available');
   };
@@ -75,34 +84,34 @@ const CageManagement = () => {
         </div>
         <div className="forms">
           <div className="add-cage">
-            <h2>Thêm chuồng mới</h2>
+            <h2>Add new cage</h2>
             <form onSubmit={handleAddCage}>
-              <label>Tên chuồng:</label>
+              <label>Cage name:</label>
               <input type="text" value={newCageName} onChange={(e) => setNewCageName(e.target.value)} />
               <br />
-              <label>Tình trạng:</label>
+              <label>Status:</label>
               <select value={newCageStatus} onChange={(e) => setNewCageStatus(e.target.value)}>
-                <option value="Available">Trống</option>
-                <option value="Occupied">Đã có thú cưng</option>
+                <option value="Available">Available</option>
+                <option value="Occupied">Already have a pet</option>
               </select>
               <br />
-              <button type="submit">Thêm</button>
+              <button type="submit">Add</button>
             </form>
           </div>
           {editingCageId && (
             <div className="edit-cage">
-              <h2>Sửa chuồng</h2>
+              <h2>Edit Cage</h2>
               <form onSubmit={handleUpdateCage}>
-                <label>Tên chuồng:</label>
+                <label>Cage name:</label>
                 <input type="text" value={editingCageName} onChange={(e) => setEditingCageName(e.target.value)} />
                 <br />
-                <label>Tình trạng:</label>
+                <label>Status:</label>
                 <select value={editingCageStatus} onChange={(e) => setEditingCageStatus(e.target.value)}>
-                  <option value="Available">Trống</option>
-                  <option value="Occupied">Đã có thú cưng</option>
+                  <option value="Available">Available</option>
+                  <option value="Occupied">Already have a pet</option>
                 </select>
                 <br />
-                <button type="submit">Cập nhật</button>
+                <button type="submit">Update</button>
               </form>
             </div>
           )}
