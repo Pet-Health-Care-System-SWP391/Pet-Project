@@ -16,6 +16,7 @@ const MedicalRecords = () => {
     ownerId: ''
   });
   const [editingPetId, setEditingPetId] = useState(null);
+  const [originalCageId, setOriginalCageId] = useState('');
 
   useEffect(() => {
     const db = getDatabase();
@@ -46,33 +47,63 @@ const MedicalRecords = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const isCageOccupied = (cageId) => {
+    return pets.some(pet => pet.cageId === cageId && pet.id !== editingPetId);
+  };
+
+  const isCageExist = (cageId) => {
+    return cages.some(cage => cage.id === cageId);
+  };
+
   const handleAddPet = () => {
     const db = getDatabase();
     const petsRef = ref(db, 'pets');
     const newPetRef = push(petsRef);
 
-    const selectedCage = cages.find(cage => cage.id === formData.cageId);
-    if (selectedCage) {
-      if (selectedCage.status === 'Available') {
-        set(newPetRef, formData);
-        const cageRef = ref(db, `cages/${formData.cageId}`);
-        update(cageRef, { status: 'Occupied' });
-        toast.success('Pet added successfully!');
-      } else {
-        toast.error('Selected cage already has a pet!');
-      }
-    } else {
+    if (!isCageExist(formData.cageId)) {
       toast.error('Selected cage does not exist!');
+      return;
     }
+
+    if (isCageOccupied(formData.cageId)) {
+      toast.error('Selected cage already has a pet!');
+      return;
+    }
+
+    set(newPetRef, formData);
+    const cageRef = ref(db, `cages/${formData.cageId}`);
+    update(cageRef, { status: 'Occupied' });
+    toast.success('Pet added successfully!');
   };
 
   const handleUpdatePet = () => {
     if (editingPetId) {
+      if (!isCageExist(formData.cageId)) {
+        toast.error('Selected cage does not exist!');
+        return;
+      }
+
+      if (isCageOccupied(formData.cageId)) {
+        toast.error('Selected cage already has a pet!');
+        return;
+      }
+
       const db = getDatabase();
       const petRef = ref(db, `pets/${editingPetId}`);
       update(petRef, formData);
+
+      // Update cage statuses
+      if (originalCageId && originalCageId !== formData.cageId) {
+        const originalCageRef = ref(db, `cages/${originalCageId}`);
+        update(originalCageRef, { status: 'Available' });
+
+        const newCageRef = ref(db, `cages/${formData.cageId}`);
+        update(newCageRef, { status: 'Occupied' });
+      }
+
       toast.success('Pet updated successfully!');
       setEditingPetId(null);
+      setOriginalCageId('');
     }
   };
 
@@ -90,6 +121,7 @@ const MedicalRecords = () => {
   const handleEditPet = (pet) => {
     setFormData(pet);
     setEditingPetId(pet.id);
+    setOriginalCageId(pet.cageId); // Store the original cage ID to update its status later if needed
   };
 
   return (

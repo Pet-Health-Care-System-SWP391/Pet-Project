@@ -1,53 +1,43 @@
 .scheduling-container {
-    text-align: center;
-  }
-  
-  .time-slots {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-  
-  .time-slots button {
-    margin: 5px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    width: 80px;
-    text-align: center;
-  }
-  
-  .time-slots button.selected {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  input[type="date"] {
-    margin: 10px 0;
-    padding: 5px;
-  }
-  
-  button {
-    margin: 10px 0;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background-color: green;
-    color: white;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: green;
-  }
-  
-  select {
-    margin: 10px 0;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
+  text-align: center;
+  margin: 20px;
+}
+
+.scheduling-container h1 {
+  margin-bottom: 20px;
+}
+
+.scheduling-container select,
+.scheduling-container input[type="date"] {
+  margin: 10px;
+  padding: 5px;
+}
+
+.time-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+  margin-left: 300px;
+}
+
+.time-slots h2 {
+  width: 100%;
+  text-align: center;
+}
+
+.time-slots button {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  border-radius: 5px;
+  color: black;
+}
+
+.time-slots button.selected {
+  background-color: #4caf50;
+  color: white;
+  border: 1px solid #4caf50;
+}

@@ -24,7 +24,6 @@ const VetScheduling = () => {
     const usersRef = ref(db, 'users');
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
-
       const vetsList = data ? Object.keys(data).map((key) => ({
         id: key,
         ...data[key]
@@ -36,12 +35,12 @@ const VetScheduling = () => {
   const handleVetSelect = (vetId) => {
     const vet = vets.find(vet => vet.id === vetId);
     setSelectedVet(vet);
-    setSelectedTimes([]); 
+    setSelectedTimes([]);
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    setSelectedTimes([]); 
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+    setSelectedTimes([]);
   };
 
   const handleTimeSelect = (time) => {
@@ -80,32 +79,28 @@ const VetScheduling = () => {
           <option key={vet.id} value={vet.id}>{vet.username}</option>
         ))}
       </select>
-      <input type="date" onChange={(e) => handleDateChange(e.target.value)} />
-      <div>
+      <input type="date" onChange={handleDateChange} />
+      <div className="time-slots">
         <h2>Morning</h2>
-        <div className="time-slots">
-          {timeSlots.slice(0, 8).map(time => (
-            <button
-              key={time}
-              onClick={() => handleTimeSelect(time)}
-              className={selectedTimes.includes(time) ? 'selected' : ''}
-            >
-              {time}
-            </button>
-          ))}
-        </div>
+        {timeSlots.slice(0, 8).map(time => (
+          <button
+            key={time}
+            onClick={() => handleTimeSelect(time)}
+            className={selectedTimes.includes(time) ? 'selected' : ''}
+          >
+            {time}
+          </button>
+        ))}
         <h2>Afternoon</h2>
-        <div className="time-slots">
-          {timeSlots.slice(8).map(time => (
-            <button
-              key={time}
-              onClick={() => handleTimeSelect(time)}
-              className={selectedTimes.includes(time) ? 'selected' : ''}
-            >
-              {time}
-            </button>
-          ))}
-        </div>
+        {timeSlots.slice(8).map(time => (
+          <button
+            key={time}
+            onClick={() => handleTimeSelect(time)}
+            className={selectedTimes.includes(time) ? 'selected' : ''}
+          >
+            {time}
+          </button>
+        ))}
       </div>
       <button onClick={handleSchedule}>Create Schedule</button>
       <ToastContainer />

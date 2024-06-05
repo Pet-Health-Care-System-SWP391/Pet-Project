@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getDatabase, ref, onValue, set, get } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './VetScheduleManagement.css';
@@ -38,7 +38,7 @@ const VetScheduleManagement = () => {
     setSelectedVet(vet);
     if (vet && selectedDate) {
       fetchSchedule(vet.id, selectedDate);
-      fetchBookings(vet.id, selectedDate);
+      fetchBookings(vet.username, selectedDate); // Using username instead of email
     }
   };
 
@@ -46,7 +46,7 @@ const VetScheduleManagement = () => {
     setSelectedDate(date);
     if (selectedVet) {
       fetchSchedule(selectedVet.id, date);
-      fetchBookings(selectedVet.id, date);
+      fetchBookings(selectedVet.username, date); // Using username instead of email
     }
   };
 
@@ -59,17 +59,22 @@ const VetScheduleManagement = () => {
     });
   };
 
-  const fetchBookings = (vetId, date) => {
+  const fetchBookings = (username, date) => {
     const db = getDatabase();
-    const bookingsRef = ref(db, `bookings/${vetId}/${date}`);
+    const bookingsRef = ref(db, 'users');
     onValue(bookingsRef, (snapshot) => {
-      const data = snapshot.val() || [];
-      setBookings(data);
+      const data = snapshot.val() || {};
+      const vetBookings = Object.values(data)
+        .filter(user => user.bookings)
+        .flatMap(user => Object.values(user.bookings))
+        .filter(booking => booking.veterinarian === username && booking.date === date)
+        .map(booking => booking.time);
+      setBookings(vetBookings);
     });
   };
 
   const checkStatus = (time) => {
-    return bookings.includes(time) ? 'busy' : (schedule[time] || 'free');
+    return bookings.includes(time) ? 'busy' : 'free';
   };
 
   return (
