@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { getDatabase, ref, onValue, set } from 'firebase/database';
+import { getDatabase, ref, onValue, set, get } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './VetScheduling.css';
+import './VetScheduleManagement.css';
 
-const VetScheduling = () => {
+const VetScheduleManagement = () => {
   const [vets, setVets] = useState([]);
   const [selectedVet, setSelectedVet] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTimes, setSelectedTimes] = useState([]);
+  const [schedule, setSchedule] = useState({});
+  const [bookings, setBookings] = useState([]);
 
   const timeSlots = [
     "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
@@ -24,7 +25,6 @@ const VetScheduling = () => {
     const usersRef = ref(db, 'users');
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
-
       const vetsList = data ? Object.keys(data).map((key) => ({
         id: key,
         ...data[key]
@@ -36,44 +36,45 @@ const VetScheduling = () => {
   const handleVetSelect = (vetId) => {
     const vet = vets.find(vet => vet.id === vetId);
     setSelectedVet(vet);
-    setSelectedTimes([]); 
+    if (vet && selectedDate) {
+      fetchSchedule(vet.id, selectedDate);
+      fetchBookings(vet.id, selectedDate);
+    }
   };
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    setSelectedTimes([]); 
-  };
-
-  const handleTimeSelect = (time) => {
-    setSelectedTimes(prevTimes => 
-      prevTimes.includes(time) ? prevTimes.filter(t => t !== time) : [...prevTimes, time]
-    );
-  };
-
-  const handleSchedule = async () => {
-    try {
-      if (!selectedVet || !selectedDate || selectedTimes.length === 0) {
-        toast.error('Please select a veterinarian, date, and times!');
-        return;
-      }
-
-      const vetId = selectedVet.id;
-      const db = getDatabase();
-
-      for (let time of selectedTimes) {
-        const scheduleTimeRef = ref(db, `users/${vetId}/schedule/${selectedDate}/${time}`);
-        await set(scheduleTimeRef, true);
-      }
-
-      toast.success('Schedule created successfully!');
-    } catch (error) {
-      toast.error('Error creating schedule!');
+    if (selectedVet) {
+      fetchSchedule(selectedVet.id, date);
+      fetchBookings(selectedVet.id, date);
     }
   };
 
+  const fetchSchedule = (vetId, date) => {
+    const db = getDatabase();
+    const scheduleRef = ref(db, `users/${vetId}/schedule/${date}`);
+    onValue(scheduleRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setSchedule(data);
+    });
+  };
+
+  const fetchBookings = (vetId, date) => {
+    const db = getDatabase();
+    const bookingsRef = ref(db, `bookings/${vetId}/${date}`);
+    onValue(bookingsRef, (snapshot) => {
+      const data = snapshot.val() || [];
+      setBookings(data);
+    });
+  };
+
+  const checkStatus = (time) => {
+    return bookings.includes(time) ? 'busy' : (schedule[time] || 'free');
+  };
+
   return (
-    <div className="scheduling-container">
-      <h1>Schedule Vets</h1>
+    <div className="schedule-management-container">
+      <h1>Manage Vet Schedules</h1>
       <select onChange={(e) => handleVetSelect(e.target.value)}>
         <option value="">Select Veterinarian</option>
         {vets.map(vet => (
@@ -87,10 +88,10 @@ const VetScheduling = () => {
           {timeSlots.slice(0, 8).map(time => (
             <button
               key={time}
-              onClick={() => handleTimeSelect(time)}
-              className={selectedTimes.includes(time) ? 'selected' : ''}
+              className={checkStatus(time)}
+              disabled={checkStatus(time) === 'busy'}
             >
-              {time}
+              {time} {checkStatus(time) === 'busy' ? "(Busy)" : "(Free)"}
             </button>
           ))}
         </div>
@@ -99,18 +100,17 @@ const VetScheduling = () => {
           {timeSlots.slice(8).map(time => (
             <button
               key={time}
-              onClick={() => handleTimeSelect(time)}
-              className={selectedTimes.includes(time) ? 'selected' : ''}
+              className={checkStatus(time)}
+              disabled={checkStatus(time) === 'busy'}
             >
-              {time}
+              {time} {checkStatus(time) === 'busy' ? "(Busy)" : "(Free)"}
             </button>
           ))}
         </div>
       </div>
-      <button onClick={handleSchedule}>Create Schedule</button>
       <ToastContainer />
     </div>
   );
 };
 
-export default VetScheduling;
+export default VetScheduleManagement;

@@ -2,6 +2,7 @@
     padding: 20px;
     background: #2c2c54;
     color: #ffffff;
+    margin-left: 250px
   }
   
   .bookings-table {
@@ -45,6 +46,11 @@
   
   button:hover {
     background: #ff5252;
+  }
+
+  h1{
+    margin-bottom: 30px;
+    font-size: 25px;
   }
   
   

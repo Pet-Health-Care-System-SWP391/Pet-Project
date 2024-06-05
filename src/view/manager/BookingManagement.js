@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ref, onValue, getDatabase, update } from "firebase/database";
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './BookingManagement.css';
 
@@ -24,7 +24,9 @@ const BookingManagement = () => {
             bookingsSnapshot.forEach((bookingSnapshot) => {
               const bookingId = bookingSnapshot.key;
               const bookingData = bookingSnapshot.val();
-              userBookings.push({ id: bookingId, ...bookingData });
+              if (bookingData.paid) { // Chỉ lấy những bookings có paid: true
+                userBookings.push({ id: bookingId, userId, ...bookingData });
+              }
             });
             resolve(userBookings);
           });
@@ -38,17 +40,31 @@ const BookingManagement = () => {
     });
   }, []);
 
-  const handleCancelBooking = async (id) => {
+  const handleCancelBooking = async (userId, bookingId) => {
     const db = getDatabase();
-    const bookingRef = ref(db, `bookings/${id}`);
+    const bookingRef = ref(db, `users/${userId}/bookings/${bookingId}`);
 
     try {
       await update(bookingRef, { status: 'cancelled', amountToPay: 0 });
-      setBookings(bookings.map(booking => booking.id === id ? { ...booking, status: 'cancelled', amountToPay: 0 } : booking));
+      setBookings(bookings.map(booking => booking.id === bookingId ? { ...booking, status: 'cancelled', amountToPay: 0 } : booking));
       toast.success('Booking cancelled successfully');
     } catch (error) {
       console.error("Error cancelling booking:", error);
       toast.error(`Error cancelling booking: ${error.message}`);
+    }
+  };
+
+  const handleCheckInBooking = async (userId, bookingId) => {
+    const db = getDatabase();
+    const bookingRef = ref(db, `users/${userId}/bookings/${bookingId}`);
+
+    try {
+      await update(bookingRef, { status: 'checked-in' });
+      setBookings(bookings.map(booking => booking.id === bookingId ? { ...booking, status: 'checked-in' } : booking));
+      toast.success('Checked-in successful');
+    } catch (error) {
+      console.error("Error checking in:", error);
+      toast.error(`Error checking in: ${error.message}`);
     }
   };
 
@@ -66,8 +82,6 @@ const BookingManagement = () => {
             <th>Name</th>
             <th>Phone</th>
             <th>Date</th>
-            <th>Time</th>
-            <th>Reason</th>
             <th>Status</th>
             <th>Amount to Pay</th>
             <th>Actions</th>
@@ -76,23 +90,25 @@ const BookingManagement = () => {
         <tbody>
           {bookings.map((booking) => (
             <tr key={booking.id}>
-              <td>{booking.id}</td>
+              <td>{booking.bookingId}</td>
               <td>{booking.name}</td>
               <td>{booking.phone}</td>
               <td>{booking.date}</td>
-              <td>{booking.time}</td>
-              <td>{booking.reason}</td>
-              <td>{booking.status || 'active'}</td>
+              <td>{booking.status}</td>
               <td>{booking.amountToPay}</td>
               <td>
                 {booking.status !== 'cancelled' && (
-                  <button onClick={() => handleCancelBooking(booking.id)}>Cancel</button>
+                  <button onClick={() => handleCancelBooking(booking.userId, booking.id)}>Cancel</button>
+                )}
+                {booking.status !== 'cancelled' && booking.status !== 'checked-in' && (
+                  <button onClick={() => handleCheckInBooking(booking.userId, booking.id)}>Check-in</button>
                 )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <ToastContainer />
     </div>
   );
 };

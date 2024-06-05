@@ -25,6 +25,8 @@ import ForgotPassword from "./Components/googleSignIn/ForgotPassword";
 import BookingManagement from "./view/manager/BookingManagement";
 import CageManagement from "./view/manager/CageManagement";
 import MedicalRecords from "./view/manager/MedicalRecords";
+import VetScheduling from "./view/manager/VetScheduling";
+import VetScheduleManagement from "./view/manager/VetScheduleManagement ";
 
 function MainContent() {
   const location = useLocation();
@@ -75,6 +77,8 @@ function MainContent() {
             <Route path="bookings" element={<BookingManagement />} />
             <Route path="cages" element={<CageManagement />} />
             <Route path="medical-records" element={<MedicalRecords />} />
+            <Route path="vet-scheduling" element={<VetScheduling />} />
+            <Route path="vet-schedule-management" element={<VetScheduleManagement />} />
             <Route path="/pet" element={<Pet />} />
             <Route path="/pet/add" element={<AddPet />} />
             <Route path="/book" element={<Book />} />
