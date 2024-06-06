@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue, set, push } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './VetScheduleManagement.css';
@@ -10,6 +10,12 @@ const VetScheduleManagement = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [schedule, setSchedule] = useState({});
   const [bookings, setBookings] = useState([]);
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    phone: '',
+    reason: ''
+  });
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
 
   const timeSlots = [
     "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
@@ -38,7 +44,7 @@ const VetScheduleManagement = () => {
     setSelectedVet(vet);
     if (vet && selectedDate) {
       fetchSchedule(vet.id, selectedDate);
-      fetchBookings(vet.username, selectedDate); // Using username instead of email
+      fetchBookings(vet.username, selectedDate); 
     }
   };
 
@@ -46,7 +52,7 @@ const VetScheduleManagement = () => {
     setSelectedDate(date);
     if (selectedVet) {
       fetchSchedule(selectedVet.id, date);
-      fetchBookings(selectedVet.username, date); // Using username instead of email
+      fetchBookings(selectedVet.username, date); 
     }
   };
 
@@ -77,6 +83,44 @@ const VetScheduleManagement = () => {
     return bookings.includes(time) ? 'busy' : 'free';
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCustomerInfo({ ...customerInfo, [name]: value });
+  };
+
+  const handleTimeSlotSelect = (time) => {
+    setSelectedTimeSlot(time);
+  };
+
+  const handleBooking = () => {
+    if (!selectedVet || !selectedDate || !selectedTimeSlot) {
+      toast.error("Please select a veterinarian, date, and time slot first.");
+      return;
+    }
+
+    const newBooking = {
+      ...customerInfo,
+      time: selectedTimeSlot,
+      date: selectedDate,
+      veterinarian: selectedVet.username
+    };
+
+    const db = getDatabase();
+    const bookingRef = push(ref(db, `users/${selectedVet.id}/bookings`));
+    set(bookingRef, newBooking);
+
+    set(ref(db, `users/${selectedVet.id}/schedule/${selectedDate}/${selectedTimeSlot}`), 'busy');
+    setBookings([...bookings, selectedTimeSlot]);
+
+    toast.success("Booking successfully added!");
+    setSelectedTimeSlot("");
+    setCustomerInfo({
+      name: '',
+      phone: '',
+      reason: ''
+    });
+  };
+
   return (
     <div className="schedule-management-container">
       <h1>Manage Vet Schedules</h1>
@@ -88,13 +132,38 @@ const VetScheduleManagement = () => {
       </select>
       <input type="date" onChange={(e) => handleDateChange(e.target.value)} />
       <div>
+        <h2>Customer Information</h2>
+        <input
+          type="text"
+          name="name"
+          placeholder="Customer Name"
+          value={customerInfo.name}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="phone"
+          placeholder="Customer Phone"
+          value={customerInfo.phone}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="reason"
+          placeholder="Reason for Visit"
+          value={customerInfo.reason}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
         <h2>Morning</h2>
         <div className="time-slots">
           {timeSlots.slice(0, 8).map(time => (
             <button
               key={time}
-              className={checkStatus(time)}
+              className={`${checkStatus(time)} ${selectedTimeSlot === time ? 'selected' : ''}`}
               disabled={checkStatus(time) === 'busy'}
+              onClick={() => handleTimeSlotSelect(time)}
             >
               {time} {checkStatus(time) === 'busy' ? "(Busy)" : "(Free)"}
             </button>
@@ -105,14 +174,16 @@ const VetScheduleManagement = () => {
           {timeSlots.slice(8).map(time => (
             <button
               key={time}
-              className={checkStatus(time)}
+              className={`${checkStatus(time)} ${selectedTimeSlot === time ? 'selected' : ''}`}
               disabled={checkStatus(time) === 'busy'}
+              onClick={() => handleTimeSlotSelect(time)}
             >
               {time} {checkStatus(time) === 'busy' ? "(Busy)" : "(Free)"}
             </button>
           ))}
         </div>
       </div>
+      <button onClick={handleBooking}>Book Appointment</button>
       <ToastContainer />
     </div>
   );

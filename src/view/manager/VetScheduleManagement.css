@@ -1,25 +1,27 @@
-/* VetScheduleManagement.css */
-
 .time-slots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  
-  .time-slots button {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .time-slots button.free {
-    background-color: green;
-    color: white;
-  }
-  
-  .time-slots button.busy {
-    background-color: red;
-    color: white;
-  }
-  
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.time-slots button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.time-slots button.free {
+  background-color: green;
+  color: white;
+}
+
+.time-slots button.busy {
+  background-color: red;
+  color: white;
+}
+
+.time-slots button.selected {
+  background-color: blue;
+  color: white;
+}
