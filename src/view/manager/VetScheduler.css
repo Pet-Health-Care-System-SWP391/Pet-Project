@@ -1,0 +1,76 @@
+.vet-scheduler-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .vet-scheduler-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .vet-scheduler-container select,
+  .vet-scheduler-container input,
+  .vet-scheduler-container button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  
+  .vet-scheduler-container .pet-info-form {
+    margin-bottom: 20px;
+  }
+  
+  .vet-scheduler-container .time-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .vet-scheduler-container .time-slots button {
+    flex: 1 0 30%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .vet-scheduler-container .time-slots .free {
+    background-color: #60a771;
+  }
+  
+  .vet-scheduler-container .time-slots .busy {
+    background-color: #d35e69;
+    cursor: not-allowed;
+  }
+  
+  .vet-scheduler-container .time-slots .selected {
+    border: 4px solid #1f6dc1;
+    ;
+  }
+  
+  .vet-scheduler-container .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .vet-scheduler-container .bookings-table th,
+  .vet-scheduler-container .bookings-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .vet-scheduler-container .bookings-table th {
+    background-color: #f0f0f0;
+  }
+  

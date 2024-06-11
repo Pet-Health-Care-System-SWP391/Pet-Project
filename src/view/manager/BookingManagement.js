@@ -24,7 +24,7 @@ const BookingManagement = () => {
             bookingsSnapshot.forEach((bookingSnapshot) => {
               const bookingId = bookingSnapshot.key;
               const bookingData = bookingSnapshot.val();
-              if (bookingData.paid) { // Chỉ lấy những bookings có paid: true
+              if (bookingData.status === 'Paid') { // Check if the status is 'Paid'
                 userBookings.push({ id: bookingId, userId, ...bookingData });
               }
             });

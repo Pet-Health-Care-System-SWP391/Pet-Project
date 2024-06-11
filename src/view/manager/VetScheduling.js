@@ -76,7 +76,7 @@ const VetScheduling = () => {
       <select onChange={(e) => handleVetSelect(e.target.value)}>
         <option value="">Select Veterinarian</option>
         {vets.map(vet => (
-          <option key={vet.id} value={vet.id}>{vet.username}</option>
+          <option key={vet.id} value={vet.id}>{vet.fullname}</option>
         ))}
       </select>
       <input type="date" onChange={handleDateChange} />

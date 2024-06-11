@@ -48,6 +48,11 @@ const Sidebar = () => {
               <FontAwesomeIcon icon={faUserMd} className="fa-icon" /> Scheduling Management
             </Link>
           </li>
+          <li>
+            <Link to="vet-scheduler">
+              <FontAwesomeIcon icon={faUserMd} className="fa-icon" /> Vet Scheduler            
+            </Link>
+          </li>
         </ul>
       </div>
     </div>

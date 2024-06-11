@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { getDatabase, ref, onValue, set, push } from 'firebase/database';
+import { getDatabase, ref, onValue, set, push, update } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './VetScheduleManagement.css';
+import './VetScheduler.css';
 
-const VetScheduleManagement = () => {
+const VetScheduler = () => {
   const [vets, setVets] = useState([]);
   const [selectedVet, setSelectedVet] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
-  const [schedule, setSchedule] = useState({});
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [customerInfo, setCustomerInfo] = useState({
-    name: '',
-    phone: '',
-    reason: ''
+  const [cages, setCages] = useState([]);
+  const [petInfo, setPetInfo] = useState({
+    ownerName: '',
+    ownerPhone: '',
+    petName: '',
+    reason: '',
+    cage: ''
   });
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
 
@@ -22,13 +25,15 @@ const VetScheduleManagement = () => {
     "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
     "12:00 PM", "12:15 PM", "12:30 PM", "12:45 PM",
     "2:15 PM", "2:30 PM", "2:45 PM", "3:00 PM",
-    "3:15 PM", "3:30 PM", "15:45", "4:00 PM",
+    "3:15 PM", "3:30 PM", "3:45 PM", "4:00 PM",
     "4:15 PM", "4:30 PM", "4:45 PM"
   ];
 
   useEffect(() => {
     const db = getDatabase();
     const usersRef = ref(db, 'users');
+    const cagesRef = ref(db, 'cages');
+
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
       const vetsList = data ? Object.keys(data).map((key) => ({
@@ -37,31 +42,40 @@ const VetScheduleManagement = () => {
       })).filter(user => user.role === 'veterinarian') : [];
       setVets(vetsList);
     });
+
+    onValue(cagesRef, (snapshot) => {
+      const data = snapshot.val();
+      const cagesList = data ? Object.keys(data).map((key) => ({
+        id: key,
+        ...data[key]
+      })) : [];
+      setCages(cagesList);
+    });
   }, []);
 
   const handleVetSelect = (vetId) => {
     const vet = vets.find(vet => vet.id === vetId);
     setSelectedVet(vet);
     if (vet && selectedDate) {
-      fetchSchedule(vet.id, selectedDate);
-      fetchBookings(vet.fullname, selectedDate); 
+      fetchAvailableTimeSlots(vet.id, selectedDate);
+      fetchBookings(vet.fullname, selectedDate);
     }
   };
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
     if (selectedVet) {
-      fetchSchedule(selectedVet.id, date);
-      fetchBookings(selectedVet.fullname, date); 
+      fetchAvailableTimeSlots(selectedVet.id, date);
+      fetchBookings(selectedVet.fullname, date);
     }
   };
 
-  const fetchSchedule = (vetId, date) => {
+  const fetchAvailableTimeSlots = (vetId, date) => {
     const db = getDatabase();
     const scheduleRef = ref(db, `users/${vetId}/schedule/${date}`);
     onValue(scheduleRef, (snapshot) => {
       const data = snapshot.val() || {};
-      setSchedule(data);
+      setAvailableTimeSlots(data);
     });
   };
 
@@ -74,22 +88,26 @@ const VetScheduleManagement = () => {
         .filter(user => user.bookings)
         .flatMap(user => Object.values(user.bookings))
         .filter(booking => booking.vet.name === vetName && booking.date === date)
-        .map(booking => booking.time);
+        .map(booking => ({ time: booking.time, cage: booking.cage }));
       setBookings(vetBookings);
     });
   };
 
   const checkStatus = (time) => {
-    return bookings.includes(time) ? 'busy' : 'free';
+    return bookings.some(booking => booking.time === time) ? 'busy' : 'free';
   };
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCustomerInfo({ ...customerInfo, [name]: value });
+    setPetInfo({ ...petInfo, [name]: value });
   };
 
   const handleTimeSlotSelect = (time) => {
     setSelectedTimeSlot(time);
+  };
+
+  const isCageAvailable = (cageId) => {
+    return cages.some(cage => cage.id === cageId && cage.status === 'Available');
   };
 
   const handleBooking = () => {
@@ -98,11 +116,17 @@ const VetScheduleManagement = () => {
       return;
     }
 
+    if (!isCageAvailable(petInfo.cage)) {
+      toast.error('Selected cage is not available!');
+      return;
+    }
+
     const newBooking = {
-      ...customerInfo,
+      ...petInfo,
       time: selectedTimeSlot,
       date: selectedDate,
-      vet: { name: selectedVet.fullname }
+      vet: { name: selectedVet.fullname },
+      status: 'confirmed'
     };
 
     const db = getDatabase();
@@ -110,20 +134,26 @@ const VetScheduleManagement = () => {
     set(bookingRef, newBooking);
 
     set(ref(db, `users/${selectedVet.id}/schedule/${selectedDate}/${selectedTimeSlot}`), 'busy');
-    setBookings([...bookings, selectedTimeSlot]);
 
+    const cageRef = ref(db, `cages/${petInfo.cage}`);
+    update(cageRef, { status: 'Occupied' });
+
+    setBookings([...bookings, { time: selectedTimeSlot, cage: petInfo.cage }]);
     toast.success("Booking successfully added!");
+
     setSelectedTimeSlot("");
-    setCustomerInfo({
-      name: '',
-      phone: '',
-      reason: ''
+    setPetInfo({
+      ownerName: '',
+      ownerPhone: '',
+      petName: '',
+      reason: '',
+      cage: ''
     });
   };
 
   return (
-    <div className="schedule-management-container">
-      <h1>Manage Vet Schedules</h1>
+    <div className="vet-scheduler-container">
+      <h1>Vet Schedule Management</h1>
       <select onChange={(e) => handleVetSelect(e.target.value)}>
         <option value="">Select Veterinarian</option>
         {vets.map(vet => (
@@ -131,48 +161,49 @@ const VetScheduleManagement = () => {
         ))}
       </select>
       <input type="date" onChange={(e) => handleDateChange(e.target.value)} />
-      <div>
-        <h2>Customer Information</h2>
+      <div className="pet-info-form">
+        <h2>Pet and Owner Information</h2>
         <input
           type="text"
-          name="name"
-          placeholder="Customer Name"
-          value={customerInfo.name}
-          onChange={handleChange}
+          name="ownerName"
+          placeholder="Owner Name"
+          value={petInfo.ownerName}
+          onChange={handleInputChange}
         />
         <input
           type="text"
-          name="phone"
-          placeholder="Customer Phone"
-          value={customerInfo.phone}
-          onChange={handleChange}
+          name="ownerPhone"
+          placeholder="Owner Phone"
+          value={petInfo.ownerPhone}
+          onChange={handleInputChange}
+        />
+        <input
+          type="text"
+          name="petName"
+          placeholder="Pet Name"
+          value={petInfo.petName}
+          onChange={handleInputChange}
         />
         <input
           type="text"
           name="reason"
           placeholder="Reason for Visit"
-          value={customerInfo.reason}
-          onChange={handleChange}
+          value={petInfo.reason}
+          onChange={handleInputChange}
+        />
+        <input
+          type="text"
+          name="cage"
+          placeholder="Cage Number"
+          value={petInfo.cage}
+          onChange={handleInputChange}
         />
         <button onClick={handleBooking}>Book Appointment</button>
       </div>
       <div>
-        <h2>Morning</h2>
+        <h2>Available Time Slots</h2>
         <div className="time-slots">
-          {timeSlots.slice(0, 8).map(time => (
-            <button
-              key={time}
-              className={`${checkStatus(time)} ${selectedTimeSlot === time ? 'selected' : ''}`}
-              disabled={checkStatus(time) === 'busy'}
-              onClick={() => handleTimeSlotSelect(time)}
-            >
-              {time} {checkStatus(time) === 'busy' ? "(Busy)" : "(Free)"}
-            </button>
-          ))}
-        </div>
-        <h2>Afternoon</h2>
-        <div className="time-slots">
-          {timeSlots.slice(8).map(time => (
+          {timeSlots.map(time => (
             <button
               key={time}
               className={`${checkStatus(time)} ${selectedTimeSlot === time ? 'selected' : ''}`}
@@ -189,4 +220,4 @@ const VetScheduleManagement = () => {
   );
 };
 
-export default VetScheduleManagement;
+export default VetScheduler;

@@ -9,6 +9,7 @@ import CageManagement from './CageManagement';
 import MedicalRecords from './MedicalRecords';
 import VetScheduling from './VetScheduling';
 import VetScheduleManagement from './VetScheduleManagement ';
+import VetScheduler from './VetScheduler';
 import Sidebar from './Sidebar'; 
 import { getDatabase, ref, onValue } from "firebase/database";
 
@@ -58,6 +59,7 @@ const Manager = () => {
           <Route path="medical-records" element={<MedicalRecords />} />
           <Route path="vet-scheduling" element={<VetScheduling />} />
           <Route path="vet-schedule-management" element={<VetScheduleManagement />} />
+          <Route path='vet-scheduler' element={<VetScheduler />} />
         </Routes>
       </div>
       <ToastContainer autoClose={3000} />

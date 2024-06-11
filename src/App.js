@@ -27,6 +27,7 @@ import CageManagement from "./view/manager/CageManagement";
 import MedicalRecords from "./view/manager/MedicalRecords";
 import VetScheduling from "./view/manager/VetScheduling";
 import VetScheduleManagement from "./view/manager/VetScheduleManagement ";
+import VetScheduler from "./view/manager/VetScheduler";
 
 function MainContent() {
   const location = useLocation();
@@ -79,6 +80,7 @@ function MainContent() {
             <Route path="medical-records" element={<MedicalRecords />} />
             <Route path="vet-scheduling" element={<VetScheduling />} />
             <Route path="vet-schedule-management" element={<VetScheduleManagement />} />
+            <Route path="vet-scheduler" element={<VetScheduler />} />
             <Route path="/pet" element={<Pet />} />
             <Route path="/pet/add" element={<AddPet />} />
             <Route path="/book" element={<Book />} />
