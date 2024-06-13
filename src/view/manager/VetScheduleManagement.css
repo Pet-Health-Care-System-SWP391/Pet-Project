@@ -12,12 +12,12 @@
 }
 
 .time-slots button.free {
-  background-color: green;
+  background-color: #60a771;
   color: white;
 }
 
 .time-slots button.busy {
-  background-color: red;
+  background-color: #d35e69;
   color: white;
 }
 

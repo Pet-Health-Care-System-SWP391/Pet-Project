@@ -10,13 +10,23 @@ const BookingManagement = () => {
 
   useEffect(() => {
     const db = getDatabase();
-    const bookingRef = ref(db, 'users');
+    const usersRef = ref(db, 'users');
 
-    onValue(bookingRef, async (snapshot) => {
-      const bookingPromises = [];
+    onValue(usersRef, (snapshot) => {
+      const usersData = snapshot.val() || {};
+      const usersMap = {};
+
       
-      snapshot.forEach((userSnapshot) => {
-        const userId = userSnapshot.key;
+      for (const userId in usersData) {
+        usersMap[userId] = {
+          name: usersData[userId].username,
+          phone: usersData[userId].phone
+        };
+      }
+
+      const bookingPromises = [];
+
+      for (const userId in usersData) {
         const userBookingsRef = ref(db, `users/${userId}/bookings`);
         const bookingPromise = new Promise((resolve) => {
           onValue(userBookingsRef, (bookingsSnapshot) => {
@@ -24,19 +34,26 @@ const BookingManagement = () => {
             bookingsSnapshot.forEach((bookingSnapshot) => {
               const bookingId = bookingSnapshot.key;
               const bookingData = bookingSnapshot.val();
-              if (bookingData.status === 'Paid') { // Check if the status is 'Paid'
-                userBookings.push({ id: bookingId, userId, ...bookingData });
+              if (bookingData.status === 'Paid') { 
+                userBookings.push({
+                  id: bookingId,
+                  userId,
+                  ...bookingData,
+                  name: usersMap[userId]?.name,
+                  phone: usersMap[userId]?.phone
+                });
               }
             });
             resolve(userBookings);
           });
         });
         bookingPromises.push(bookingPromise);
-      });
+      }
 
-      const allBookings = await Promise.all(bookingPromises);
-      setBookings(allBookings.flat());
-      setLoading(false);
+      Promise.all(bookingPromises).then(allBookings => {
+        setBookings(allBookings.flat());
+        setLoading(false);
+      });
     });
   }, []);
 
