@@ -1,31 +1,43 @@
 .scheduling-container {
-  text-align: center;
-  margin: 20px;
+  margin-left: 250px; /* Adjusted to leave space for the sidebar */
+  padding: 20px;
+  background-color: #f0f4f8;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .scheduling-container h1 {
   margin-bottom: 20px;
 }
 
-.scheduling-container select,
-.scheduling-container input[type="date"] {
+.scheduling-container select {
   margin: 10px;
-  padding: 5px;
+  padding: 10px;
+  font-size: 16px;
   font-weight: 500;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .time-slots {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin: 20px 0;
-  margin-left: 300px;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
 }
 
 .time-slots h2 {
   width: 100%;
   text-align: center;
+  margin-bottom: 10px;
+}
+
+.slot-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .time-slots button {
@@ -42,4 +54,21 @@
   background-color: #4caf50;
   color: white;
   border: 1px solid #4caf50;
+}
+
+.scheduling-container button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #0056b3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  background: #60a771;
+}
+
+.scheduling-container button:hover {
+  background-color: #0056b3;
 }

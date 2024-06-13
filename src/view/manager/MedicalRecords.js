@@ -3,6 +3,7 @@ import { getDatabase, ref, onValue, push, update, remove, set } from 'firebase/d
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { database } from '../../Components/firebase/firebase'; 
+import './MedicalRecords.css';
 
 const MedicalRecords = () => {
   const [pets, setPets] = useState([]);
@@ -125,9 +126,9 @@ const MedicalRecords = () => {
   };
 
   return (
-    <div>
+    <div className="medical-records">
       <h1>Manage Medical Records</h1>
-      <div>
+      <div className="records-form">
         <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} />
         <input name="species" placeholder="Species" value={formData.species} onChange={handleChange} />
         <input name="admissionDate" placeholder="Admission Date" value={formData.admissionDate} onChange={handleChange} />
@@ -138,16 +139,36 @@ const MedicalRecords = () => {
           {editingPetId ? 'Update Pet' : 'Add Pet'}
         </button>
       </div>
-      <ul>
-        {pets.map(pet => (
-          <li key={pet.id}>
-            {pet.name} - {pet.species} - {pet.admissionDate} - {pet.healthStatus} - {pet.cageId} - {pet.ownerId}
-            <button onClick={() => handleEditPet(pet)}>Edit</button>
-            <button onClick={() => handleDeletePet(pet.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <ToastContainer />
+      <table className="records-list">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Species</th>
+            <th>Admission Date</th>
+            <th>Health Status</th>
+            <th>Cage ID</th>
+            <th>Owner ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pets.map(pet => (
+            <tr key={pet.id}>
+              <td>{pet.name}</td>
+              <td>{pet.species}</td>
+              <td>{pet.admissionDate}</td>
+              <td>{pet.healthStatus}</td>
+              <td>{pet.cageId}</td>
+              <td>{pet.ownerId}</td>
+              <td>
+                <button onClick={() => handleEditPet(pet)}>Edit</button>
+                <button onClick={() => handleDeletePet(pet.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ToastContainer className="toast-container" />
     </div>
   );
 };

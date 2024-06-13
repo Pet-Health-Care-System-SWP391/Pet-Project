@@ -7,8 +7,6 @@ const CageManagement = () => {
   const [newCageName, setNewCageName] = useState('');
   const [newCageStatus, setNewCageStatus] = useState('Available');
   const [editingCageId, setEditingCageId] = useState(null);
-  const [editingCageName, setEditingCageName] = useState('');
-  const [editingCageStatus, setEditingCageStatus] = useState('Available');
 
   useEffect(() => {
     const db = getDatabase();
@@ -45,18 +43,13 @@ const CageManagement = () => {
 
   const handleEditCage = (cage) => {
     setEditingCageId(cage.id);
-    setEditingCageName(cage.name);
-    setEditingCageStatus(cage.status);
   };
 
-  const handleUpdateCage = (e) => {
-    e.preventDefault();
+  const handleSaveCage = (cageId, name, status) => {
     const db = getDatabase();
-    const cageRef = ref(db, `cages/${editingCageId}`);
-    update(cageRef, { name: editingCageName, status: editingCageStatus });
+    const cageRef = ref(db, `cages/${cageId}`);
+    update(cageRef, { name, status });
     setEditingCageId(null);
-    setEditingCageName('');
-    setEditingCageStatus('Available');
   };
 
   const handleDeleteCage = (cageId) => {
@@ -68,55 +61,68 @@ const CageManagement = () => {
   return (
     <div className="cage-management">
       <h1>Cage Management</h1>
-      <div className="content">
-        <div className="cage-list">
-          <h2>List of cages</h2>
-          <ul>
-            {cages.map(cage => (
-              <li key={cage.id}>
-                <span>{cage.name}</span>
-                <span>{cage.status === 'Available' ? 'Available' : 'Already have a pet'}</span>
-                <button onClick={() => handleEditCage(cage)}>Edit</button>
-                <button onClick={() => handleDeleteCage(cage.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="forms">
-          <div className="add-cage">
-            <h2>Add new cage</h2>
-            <form onSubmit={handleAddCage}>
-              <label>Cage name:</label>
-              <input type="text" value={newCageName} onChange={(e) => setNewCageName(e.target.value)} />
-              <br />
-              <label>Status:</label>
-              <select value={newCageStatus} onChange={(e) => setNewCageStatus(e.target.value)}>
-                <option value="Available">Available</option>
-                <option value="Occupied">Already have a pet</option>
-              </select>
-              <br />
-              <button type="submit">Add</button>
-            </form>
-          </div>
-          {editingCageId && (
-            <div className="edit-cage">
-              <h2>Edit Cage</h2>
-              <form onSubmit={handleUpdateCage}>
-                <label>Cage name:</label>
-                <input type="text" value={editingCageName} onChange={(e) => setEditingCageName(e.target.value)} />
-                <br />
-                <label>Status:</label>
-                <select value={editingCageStatus} onChange={(e) => setEditingCageStatus(e.target.value)}>
-                  <option value="Available">Available</option>
-                  <option value="Occupied">Already have a pet</option>
-                </select>
-                <br />
-                <button type="submit">Update</button>
-              </form>
-            </div>
-          )}
-        </div>
+      <div className="add-cage">
+        <h2>Add new cage</h2>
+        <form onSubmit={handleAddCage}>
+          <label>Cage name:</label>
+          <input type="text" value={newCageName} onChange={(e) => setNewCageName(e.target.value)} />
+          <label>Status:</label>
+          <select value={newCageStatus} onChange={(e) => setNewCageStatus(e.target.value)}>
+            <option value="Available">Available</option>
+            <option value="Already has a pet">Already has a pet</option>
+          </select>
+          <button type="submit">Add</button>
+        </form>
       </div>
+      <table className="cage-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cages.map(cage => (
+            <tr key={cage.id}>
+              <td>{cage.id}</td>
+              <td>
+                {editingCageId === cage.id ? (
+                  <input
+                    type="text"
+                    defaultValue={cage.name}
+                    onChange={(e) => cage.name = e.target.value}
+                  />
+                ) : (
+                  cage.name
+                )}
+              </td>
+              <td>
+                {editingCageId === cage.id ? (
+                  <select
+                    defaultValue={cage.status}
+                    onChange={(e) => cage.status = e.target.value}
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Already has a pet">Already has a pet</option>
+                  </select>
+                ) : (
+                  cage.status === 'Available' ? 'Available' : 'Already has a pet'
+                )}
+              </td>
+              <td>
+                {editingCageId === cage.id ? (
+                  <button onClick={() => handleSaveCage(cage.id, cage.name, cage.status)}>Save</button>
+                ) : (
+                  <button onClick={() => handleEditCage(cage)}>Edit</button>
+                )}
+                <button onClick={() => handleDeleteCage(cage.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

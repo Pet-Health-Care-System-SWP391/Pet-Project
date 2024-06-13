@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
+import DatePicker from 'react-datepicker';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-datepicker/dist/react-datepicker.css';
 import './VetScheduling.css';
 
 const VetScheduling = () => {
   const [vets, setVets] = useState([]);
   const [selectedVet, setSelectedVet] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTimes, setSelectedTimes] = useState([]);
 
   const timeSlots = [
@@ -38,13 +40,13 @@ const VetScheduling = () => {
     setSelectedTimes([]);
   };
 
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
     setSelectedTimes([]);
   };
 
   const handleTimeSelect = (time) => {
-    setSelectedTimes(prevTimes => 
+    setSelectedTimes(prevTimes =>
       prevTimes.includes(time) ? prevTimes.filter(t => t !== time) : [...prevTimes, time]
     );
   };
@@ -60,7 +62,7 @@ const VetScheduling = () => {
       const db = getDatabase();
 
       for (let time of selectedTimes) {
-        const scheduleTimeRef = ref(db, `users/${vetId}/schedule/${selectedDate}/${time}`);
+        const scheduleTimeRef = ref(db, `users/${vetId}/schedule/${selectedDate.toISOString().split('T')[0]}/${time}`);
         await set(scheduleTimeRef, true);
       }
 
@@ -79,28 +81,36 @@ const VetScheduling = () => {
           <option key={vet.id} value={vet.id}>{vet.fullname}</option>
         ))}
       </select>
-      <input type="date" onChange={handleDateChange} />
+      <DatePicker
+        selected={selectedDate}
+        onChange={handleDateChange}
+        inline
+      />
       <div className="time-slots">
         <h2>Morning</h2>
-        {timeSlots.slice(0, 8).map(time => (
-          <button
-            key={time}
-            onClick={() => handleTimeSelect(time)}
-            className={selectedTimes.includes(time) ? 'selected' : ''}
-          >
-            {time}
-          </button>
-        ))}
+        <div className="slot-container">
+          {timeSlots.slice(0, 8).map(time => (
+            <button
+              key={time}
+              onClick={() => handleTimeSelect(time)}
+              className={selectedTimes.includes(time) ? 'selected' : ''}
+            >
+              {time}
+            </button>
+          ))}
+        </div>
         <h2>Afternoon</h2>
-        {timeSlots.slice(8).map(time => (
-          <button
-            key={time}
-            onClick={() => handleTimeSelect(time)}
-            className={selectedTimes.includes(time) ? 'selected' : ''}
-          >
-            {time}
-          </button>
-        ))}
+        <div className="slot-container">
+          {timeSlots.slice(8).map(time => (
+            <button
+              key={time}
+              onClick={() => handleTimeSelect(time)}
+              className={selectedTimes.includes(time) ? 'selected' : ''}
+            >
+              {time}
+            </button>
+          ))}
+        </div>
       </div>
       <button onClick={handleSchedule}>Create Schedule</button>
       <ToastContainer />

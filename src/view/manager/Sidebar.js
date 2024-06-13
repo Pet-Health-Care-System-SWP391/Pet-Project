@@ -8,7 +8,7 @@ import {
   faClipboardList,
   faUserMd
 } from '@fortawesome/free-solid-svg-icons';
-import '../../../src/index.css';
+import './Sidebar.css';
 
 const Sidebar = () => {
   return (
