@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue, getDatabase, update, push, remove, set, get } from "firebase/database";
+import { ref, onValue, getDatabase, update, remove, get } from "firebase/database";
+import { useNavigate } from 'react-router-dom';
 import './CageManagement.css';
 
 const CageManagement = () => {
   const [cages, setCages] = useState([]);
-  const [newCageName, setNewCageName] = useState('');
-  const [newCageStatus, setNewCageStatus] = useState('Available');
   const [editingCageId, setEditingCageId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const db = getDatabase();
@@ -22,23 +22,8 @@ const CageManagement = () => {
     });
   }, []);
 
-  const generateCageId = async () => {
-    const db = getDatabase();
-    const cagesRef = ref(db, 'cages');
-    const snapshot = await get(cagesRef);
-    const data = snapshot.val();
-    const numberOfCages = data ? Object.keys(data).length : 0;
-    return `cage${numberOfCages + 1}`;
-  };
-
-  const handleAddCage = async (e) => {
-    e.preventDefault();
-    const db = getDatabase();
-    const newCageId = await generateCageId();
-    const newCageRef = ref(db, `cages/${newCageId}`);
-    set(newCageRef, { name: newCageName, status: newCageStatus, id: newCageId });
-    setNewCageName('');
-    setNewCageStatus('Available');
+  const handleAddCage = () => {
+    navigate('/manager/add-cage');
   };
 
   const handleEditCage = (cage) => {
@@ -61,19 +46,7 @@ const CageManagement = () => {
   return (
     <div className="cage-management">
       <h1>Cage Management</h1>
-      <div className="add-cage">
-        <h2>Add new cage</h2>
-        <form onSubmit={handleAddCage}>
-          <label>Cage name:</label>
-          <input type="text" value={newCageName} onChange={(e) => setNewCageName(e.target.value)} />
-          <label>Status:</label>
-          <select value={newCageStatus} onChange={(e) => setNewCageStatus(e.target.value)}>
-            <option value="Available">Available</option>
-            <option value="Already has a pet">Already has a pet</option>
-          </select>
-          <button type="submit">Add</button>
-        </form>
-      </div>
+      <button onClick={handleAddCage} className="add-cage-button">Add New Cage</button>
       <table className="cage-table">
         <thead>
           <tr>

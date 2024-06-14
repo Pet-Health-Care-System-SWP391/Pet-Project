@@ -57,6 +57,8 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 45%;
   margin: 20px auto;
+  margin-top: 211px;
+  margin-left: 615px;
 }
 
 .add-cage h2, .edit-cage h2 {
@@ -93,4 +95,17 @@
 
 .add-cage button:hover, .edit-cage button:hover {
   background-color: #2980b9;
+}
+
+.add-cage-button {
+  background: #ff6b6b;
+  border: none;
+  color: white;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 0 5px;
+  margin-left: 1375px;
+  font-size: 13px;
+  font-weight: 500;
 }

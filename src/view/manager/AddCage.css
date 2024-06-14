@@ -1,0 +1,48 @@
+.add-cage-container {
+    padding: 20px;
+    margin-left: 250px; /* Ensure the content doesn't overlap the sidebar */
+    color: white;
+  }
+  
+  .add-cage-container h1 {
+    text-align: center;
+    color: white;
+  }
+  
+  form {
+    background-color: #23272a;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    margin: 20px auto;
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 8px;
+    color: white;
+  }
+  
+  form input, form select {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    width: 100%;
+  }
+  
+  form button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  form button:hover {
+    background-color: #2980b9;
+  }
+  

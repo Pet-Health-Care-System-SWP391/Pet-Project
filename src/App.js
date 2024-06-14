@@ -24,6 +24,7 @@ import { TransactionProvider } from "../src/Components/context/TransactionContex
 import ForgotPassword from "./Components/googleSignIn/ForgotPassword";
 import BookingManagement from "./view/manager/BookingManagement";
 import CageManagement from "./view/manager/CageManagement";
+import AddCage from "./view/manager/AddCage";
 import MedicalRecords from "./view/manager/MedicalRecords";
 import VetScheduling from "./view/manager/VetScheduling";
 import VetScheduleManagement from "./view/manager/VetScheduleManagement ";
@@ -77,6 +78,7 @@ function MainContent() {
             <Route path="/manager/*" element={<Manager />} />
             <Route path="bookings" element={<BookingManagement />} />
             <Route path="cages" element={<CageManagement />} />
+            <Route path="add-cage" element={<AddCage />} />
             <Route path="medical-records" element={<MedicalRecords />} />
             <Route path="vet-scheduling" element={<VetScheduling />} />
             <Route path="vet-schedule-management" element={<VetScheduleManagement />} />
